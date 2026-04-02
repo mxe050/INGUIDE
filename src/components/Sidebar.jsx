@@ -1,98 +1,116 @@
-import { useState, useEffect, memo, useCallback } from 'react'
+import { memo, useState, useCallback } from 'react'
 
-function SidebarItem({ section, selectedSection, selectedSubSection, onSelect, index }) {
-  const isActive = selectedSection === section.id
-  const [isExpanded, setIsExpanded] = useState(isActive)
-
-  // Auto-expand when this section becomes active
-  useEffect(() => {
-    if (isActive && section.subSections?.length) {
-      setIsExpanded(true)
+const Sidebar = memo(function Sidebar({ data, selectedId, onSelect }) {
+  const [expandedModules, setExpandedModules] = useState(() => {
+    const expanded = {}
+    for (const mod of data) {
+      if (mod.sections.some((s) => s.id === selectedId)) {
+        expanded[mod.id] = true
+      }
     }
-  }, [isActive, section.subSections])
+    return expanded
+  })
 
-  const handleToggle = useCallback(() => {
-    if (section.subSections?.length) {
-      setIsExpanded(prev => !prev)
-    }
-    onSelect(section.id)
-  }, [section.id, section.subSections, onSelect])
-
-  const handleSubSelect = useCallback((subId) => {
-    onSelect(section.id, subId)
-  }, [section.id, onSelect])
+  const toggleModule = useCallback((moduleId) => {
+    setExpandedModules((prev) => ({
+      ...prev,
+      [moduleId]: !prev[moduleId],
+    }))
+  }, [])
 
   return (
-    <div className="mb-0.5">
+    <nav className="h-full flex flex-col bg-white">
+      {/* Header */}
+      <div className="px-4 py-5 border-b border-slate-200">
+        <h1 className="text-lg font-bold text-sky-700 tracking-wide">INGUIDE</h1>
+        <p className="text-xs text-slate-400 mt-1">Level 1 Learning App</p>
+      </div>
+
+      {/* Menu */}
+      <div className="flex-1 overflow-y-auto py-2">
+        {data.map((mod) => (
+          <ModuleItem
+            key={mod.id}
+            module={mod}
+            isExpanded={!!expandedModules[mod.id]}
+            selectedId={selectedId}
+            onToggle={toggleModule}
+            onSelect={onSelect}
+          />
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div className="px-4 py-3 border-t border-slate-100 text-xs text-slate-400">
+        © INGUIDE Learning
+      </div>
+    </nav>
+  )
+})
+
+const ModuleItem = memo(function ModuleItem({
+  module,
+  isExpanded,
+  selectedId,
+  onToggle,
+  onSelect,
+}) {
+  const handleToggle = useCallback(() => {
+    onToggle(module.id)
+  }, [onToggle, module.id])
+
+  return (
+    <div className="mb-1">
       <button
         onClick={handleToggle}
-        className={`
-          w-full text-left px-3 py-2.5 text-sm flex items-center justify-between gap-2
-          transition-all duration-150 rounded-lg cursor-pointer group
-          ${isActive
-            ? 'bg-blue-50 text-blue-700 font-semibold shadow-sm shadow-blue-100'
-            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-          }
-        `}
+        className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer"
       >
-        <span className="flex items-center gap-2.5 min-w-0">
-          <span className="text-base shrink-0">{section.icon || '📄'}</span>
-          <span className="leading-snug truncate">{section.title}</span>
-        </span>
-        {section.subSections?.length > 0 && (
-          <svg
-            className={`w-3.5 h-3.5 shrink-0 transition-transform duration-200 text-slate-400 group-hover:text-slate-600 ${isExpanded ? 'rotate-90' : ''}`}
-            fill="none" stroke="currentColor" viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        )}
+        <span className="text-base">{module.icon}</span>
+        <span className="flex-1 truncate">{module.title}</span>
+        <svg
+          className={`w-4 h-4 text-slate-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`}
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          strokeWidth={2}
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+        </svg>
       </button>
 
-      {/* Sub-sections with animation */}
-      {isExpanded && section.subSections?.length > 0 && (
-        <div className="ml-5 mt-0.5 border-l-2 border-slate-200 pl-3 py-0.5 space-y-0.5">
-          {section.subSections.map(sub => (
-            <button
-              key={sub.id}
-              onClick={() => handleSubSelect(sub.id)}
-              className={`
-                w-full text-left px-3 py-1.5 text-xs rounded-md transition-all duration-150 cursor-pointer
-                ${selectedSubSection === sub.id && selectedSection === section.id
-                  ? 'bg-blue-50 text-blue-600 font-medium'
-                  : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
-                }
-              `}
-            >
-              {sub.title}
-            </button>
+      {isExpanded && (
+        <div className="ml-4 border-l-2 border-slate-100">
+          {module.sections.map((section) => (
+            <SectionItem
+              key={section.id}
+              section={section}
+              isSelected={section.id === selectedId}
+              onSelect={onSelect}
+            />
           ))}
         </div>
       )}
     </div>
   )
-}
+})
 
-const MemoizedSidebarItem = memo(SidebarItem)
+const SectionItem = memo(function SectionItem({ section, isSelected, onSelect }) {
+  const handleClick = useCallback(() => {
+    onSelect(section.id)
+  }, [onSelect, section.id])
 
-function Sidebar({ sections, selectedSection, selectedSubSection, onSelect }) {
   return (
-    <nav className="py-2 px-2">
-      <div className="px-3 py-2 mb-1">
-        <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">目次</p>
-      </div>
-      {sections.map((section, index) => (
-        <MemoizedSidebarItem
-          key={section.id}
-          section={section}
-          selectedSection={selectedSection}
-          selectedSubSection={selectedSubSection}
-          onSelect={onSelect}
-          index={index}
-        />
-      ))}
-    </nav>
+    <button
+      onClick={handleClick}
+      className={`w-full text-left px-4 py-2 text-sm transition-colors cursor-pointer ${
+        isSelected
+          ? 'text-sky-700 bg-sky-50 font-medium border-l-2 border-sky-500 -ml-[2px]'
+          : 'text-slate-600 hover:text-slate-800 hover:bg-slate-50'
+      }`}
+    >
+      {section.title}
+    </button>
   )
-}
+})
 
-export default memo(Sidebar)
+export default Sidebar

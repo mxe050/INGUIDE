@@ -1,27 +1,13 @@
-import { memo, useEffect, useRef, useState, useCallback } from 'react'
+import { memo, useState, useEffect, useCallback } from 'react'
 import ImagePlaceholder from './ImagePlaceholder'
 
-function ContentPanel({ section, selectedSubSection, hasPrev, hasNext, prevSection, nextSection, onNavigate }) {
-  const subRef = useRef(null)
+function ContentPanel({ section, onNavigate, hasPrev, hasNext, prevLabel, nextLabel }) {
   const [showScrollTop, setShowScrollTop] = useState(false)
 
-  // Scroll to sub-section when selected
-  useEffect(() => {
-    if (selectedSubSection) {
-      const el = document.getElementById(`sub-${selectedSubSection}`)
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-      }
-    }
-  }, [selectedSubSection])
-
-  // Show/hide scroll-to-top button
   useEffect(() => {
     const panel = document.getElementById('content-panel')
     if (!panel) return
-    const handleScroll = () => {
-      setShowScrollTop(panel.scrollTop > 400)
-    }
+    const handleScroll = () => setShowScrollTop(panel.scrollTop > 400)
     panel.addEventListener('scroll', handleScroll, { passive: true })
     return () => panel.removeEventListener('scroll', handleScroll)
   }, [])
@@ -47,61 +33,23 @@ function ContentPanel({ section, selectedSubSection, hasPrev, hasNext, prevSecti
   return (
     <div className="relative">
       <div className="max-w-4xl mx-auto px-6 py-8 lg:px-10">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-400 mb-3">
-          <span>{section.icon || '📄'}</span>
-          <span>{section.category || 'コンテンツ'}</span>
-          {selectedSubSection && section.subSections && (
-            <>
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-              <span>{section.subSections.find(s => s.id === selectedSubSection)?.title}</span>
-            </>
-          )}
-        </div>
-
         {/* Section Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-slate-900 mb-4 leading-tight">{section.title}</h1>
-          {section.description && (
-            <p className="text-slate-600 text-lg leading-relaxed">{section.description}</p>
-          )}
+          <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 mb-3 leading-tight">{section.title}</h1>
         </div>
 
-        {/* Section Content Blocks */}
+        {/* Content Blocks */}
         {section.content?.map((block, index) => (
           <ContentBlock key={`${section.id}-${index}`} block={block} />
-        ))}
-
-        {/* Sub-sections */}
-        {section.subSections?.map(sub => (
-          <div
-            key={sub.id}
-            id={`sub-${sub.id}`}
-            ref={selectedSubSection === sub.id ? subRef : null}
-            className="mt-12 scroll-mt-6"
-          >
-            <h2 className="text-2xl font-bold text-slate-800 mb-4 pb-3 border-b-2 border-slate-200 flex items-center gap-2">
-              <span className="w-1.5 h-6 bg-blue-500 rounded-full shrink-0" />
-              {sub.title}
-            </h2>
-            {sub.description && (
-              <p className="text-slate-600 mb-4">{sub.description}</p>
-            )}
-            {sub.content?.map((block, index) => (
-              <ContentBlock key={`${sub.id}-${index}`} block={block} />
-            ))}
-          </div>
         ))}
 
         {/* Prev / Next Navigation */}
         <div className="mt-16 mb-8 pt-8 border-t border-slate-200">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {hasPrev && prevSection ? (
+            {hasPrev ? (
               <button
                 onClick={() => onNavigate(-1)}
-                className="group text-left p-4 border border-slate-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer"
+                className="group text-left p-4 border border-slate-200 rounded-xl hover:border-sky-300 hover:bg-sky-50/50 transition-all cursor-pointer"
               >
                 <span className="text-xs text-slate-400 flex items-center gap-1 mb-1">
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,15 +57,13 @@ function ContentPanel({ section, selectedSubSection, hasPrev, hasNext, prevSecti
                   </svg>
                   前のセクション
                 </span>
-                <span className="text-sm font-semibold text-slate-700 group-hover:text-blue-700 transition-colors">
-                  {prevSection.icon} {prevSection.title}
-                </span>
+                <span className="text-sm font-semibold text-slate-700 group-hover:text-sky-700">{prevLabel}</span>
               </button>
             ) : <div />}
-            {hasNext && nextSection ? (
+            {hasNext ? (
               <button
                 onClick={() => onNavigate(1)}
-                className="group text-right p-4 border border-slate-200 rounded-xl hover:border-blue-300 hover:bg-blue-50/50 transition-all cursor-pointer sm:col-start-2"
+                className="group text-right p-4 border border-slate-200 rounded-xl hover:border-sky-300 hover:bg-sky-50/50 transition-all cursor-pointer sm:col-start-2"
               >
                 <span className="text-xs text-slate-400 flex items-center justify-end gap-1 mb-1">
                   次のセクション
@@ -125,21 +71,18 @@ function ContentPanel({ section, selectedSubSection, hasPrev, hasNext, prevSecti
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </span>
-                <span className="text-sm font-semibold text-slate-700 group-hover:text-blue-700 transition-colors">
-                  {nextSection.icon} {nextSection.title}
-                </span>
+                <span className="text-sm font-semibold text-slate-700 group-hover:text-sky-700">{nextLabel}</span>
               </button>
             ) : null}
           </div>
         </div>
       </div>
 
-      {/* Scroll to top button */}
       {showScrollTop && (
         <button
           onClick={scrollToTop}
           className="fixed bottom-6 right-6 p-3 bg-white border border-slate-200 rounded-full shadow-lg hover:shadow-xl hover:bg-slate-50 transition-all z-10 cursor-pointer"
-          aria-label="ページ上部へスクロール"
+          aria-label="トップへ"
         >
           <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -154,9 +97,7 @@ const ContentBlock = memo(function ContentBlock({ block }) {
   switch (block.type) {
     case 'heading':
       return (
-        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-3 flex items-center gap-2">
-          {block.text}
-        </h3>
+        <h3 className="text-xl font-bold text-slate-800 mt-8 mb-3">{block.text}</h3>
       )
 
     case 'paragraph':
@@ -205,20 +146,9 @@ const ContentBlock = memo(function ContentBlock({ block }) {
     case 'note':
       return (
         <div className="bg-amber-50 border border-amber-200 rounded-lg px-5 py-4 mb-4 flex gap-3">
-          <span className="text-amber-500 text-lg shrink-0 mt-0.5">💡</span>
+          <span className="text-amber-500 text-lg shrink-0 mt-0.5">&#x1F4A1;</span>
           <div>
             <p className="text-xs font-semibold text-amber-600 mb-1">補足</p>
-            <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{block.text}</p>
-          </div>
-        </div>
-      )
-
-    case 'warning':
-      return (
-        <div className="bg-red-50 border border-red-200 rounded-lg px-5 py-4 mb-4 flex gap-3">
-          <span className="text-red-500 text-lg shrink-0 mt-0.5">⚠️</span>
-          <div>
-            <p className="text-xs font-semibold text-red-600 mb-1">注意</p>
             <p className="text-slate-700 leading-relaxed whitespace-pre-wrap">{block.text}</p>
           </div>
         </div>
@@ -231,15 +161,6 @@ const ContentBlock = memo(function ContentBlock({ block }) {
             <li key={i} className="text-slate-700 leading-relaxed">{item}</li>
           ))}
         </ul>
-      )
-
-    case 'ordered-list':
-      return (
-        <ol className="list-decimal pl-6 mb-4 space-y-1.5">
-          {block.items.map((item, i) => (
-            <li key={i} className="text-slate-700 leading-relaxed">{item}</li>
-          ))}
-        </ol>
       )
 
     case 'table':
@@ -257,7 +178,7 @@ const ContentBlock = memo(function ContentBlock({ block }) {
             )}
             <tbody>
               {block.rows?.map((row, i) => (
-                <tr key={i} className={`${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'} hover:bg-blue-50/30 transition-colors`}>
+                <tr key={i} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
                   {row.map((cell, j) => (
                     <td key={j} className="border-b border-slate-100 px-4 py-2.5 text-slate-700">{cell}</td>
                   ))}
@@ -266,30 +187,6 @@ const ContentBlock = memo(function ContentBlock({ block }) {
             </tbody>
           </table>
         </div>
-      )
-
-    case 'code':
-      return (
-        <div className="mb-4 rounded-lg overflow-hidden border border-slate-200">
-          {block.label && (
-            <div className="bg-slate-800 px-4 py-2 text-xs text-slate-400 font-mono">
-              {block.label}
-            </div>
-          )}
-          <pre className="bg-slate-900 px-5 py-4 text-sm text-slate-200 overflow-x-auto">
-            <code>{block.text}</code>
-          </pre>
-        </div>
-      )
-
-    case 'quote':
-      return (
-        <blockquote className="border-l-4 border-slate-300 pl-5 py-2 mb-4 italic text-slate-600">
-          <p className="leading-relaxed whitespace-pre-wrap">{block.text}</p>
-          {block.source && (
-            <footer className="text-sm text-slate-400 mt-2 not-italic">— {block.source}</footer>
-          )}
-        </blockquote>
       )
 
     case 'divider':
