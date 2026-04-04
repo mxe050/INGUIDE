@@ -1,6 +1,6 @@
-import { useState, useEffect, memo, useCallback } from 'react'
+import { useState, useEffect, memo, useCallback, useMemo } from 'react'
 
-function SidebarItem({ section, selectedSection, selectedSubSection, onSelect, index }) {
+function SidebarItem({ section, selectedSection, selectedSubSection, onSelect }) {
   const isActive = selectedSection === section.id
   const [isExpanded, setIsExpanded] = useState(isActive)
 
@@ -37,7 +37,7 @@ function SidebarItem({ section, selectedSection, selectedSubSection, onSelect, i
       >
         <span className="flex items-center gap-2.5 min-w-0">
           <span className="text-base shrink-0">{section.icon || '📄'}</span>
-          <span className="leading-snug truncate">{section.title}</span>
+          <span className="leading-snug line-clamp-2">{section.title}</span>
         </span>
         {section.subSections?.length > 0 && (
           <svg
@@ -64,7 +64,7 @@ function SidebarItem({ section, selectedSection, selectedSubSection, onSelect, i
                 }
               `}
             >
-              {sub.title}
+              <span className="line-clamp-2">{sub.title}</span>
             </button>
           ))}
         </div>
@@ -76,20 +76,54 @@ function SidebarItem({ section, selectedSection, selectedSubSection, onSelect, i
 const MemoizedSidebarItem = memo(SidebarItem)
 
 function Sidebar({ sections, selectedSection, selectedSubSection, onSelect }) {
+  // グループ化：モジュール番号ごとにセクションを分ける
+  const grouped = useMemo(() => {
+    const groups = []
+    let currentModule = null
+    let currentGroup = null
+
+    for (const section of sections) {
+      const moduleNum = section.moduleNumber ?? -1
+
+      if (moduleNum !== currentModule) {
+        currentModule = moduleNum
+        currentGroup = {
+          moduleNumber: moduleNum,
+          label: moduleNum === 0 ? null : `Module ${moduleNum}`,
+          sections: [],
+        }
+        groups.push(currentGroup)
+      }
+      currentGroup.sections.push(section)
+    }
+
+    return groups
+  }, [sections])
+
   return (
     <nav className="py-2 px-2">
       <div className="px-3 py-2 mb-1">
         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">目次</p>
       </div>
-      {sections.map((section, index) => (
-        <MemoizedSidebarItem
-          key={section.id}
-          section={section}
-          selectedSection={selectedSection}
-          selectedSubSection={selectedSubSection}
-          onSelect={onSelect}
-          index={index}
-        />
+      {grouped.map((group, gi) => (
+        <div key={gi}>
+          {group.label && (
+            <div className="px-3 pt-4 pb-1.5">
+              <p className="text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200 pb-1">
+                {group.label}
+              </p>
+            </div>
+          )}
+          {group.sections.map((section) => (
+            <MemoizedSidebarItem
+              key={section.id}
+              section={section}
+              selectedSection={selectedSection}
+              selectedSubSection={selectedSubSection}
+              onSelect={onSelect}
+            />
+          ))}
+        </div>
       ))}
     </nav>
   )
