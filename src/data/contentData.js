@@ -50,7 +50,7 @@ function buildAllContent() {
     title: 'はじめに',
     icon: '🏠',
     category: 'ガイド',
-    description: 'INGUIDE 学習アプリへようこそ。INGUIDE（International Guideline Development）プログラム Level 1の学習資料を日本語で体系的に学習できます。',
+    description: 'INGUIDE 学習アプリへようこそ。INGUIDE（International Guideline Development）プログラム Level 1の復習アプリです。INGUIDEの学習は、「https://inguide.org/」で行ってから、復習に使用してください。',
     moduleNumber: 0,
     content: [
       { type: 'heading', text: 'INGUIDE学習アプリの使い方' },
