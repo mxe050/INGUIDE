@@ -1,5 +1,6 @@
 import { memo, useEffect, useRef, useState, useCallback } from 'react'
 import MarkdownRenderer from './MarkdownRenderer'
+import QuizPanel from './QuizPanel'
 
 function ContentPanel({ section, selectedSubSection, hasPrev, hasNext, prevSection, nextSection, onNavigate }) {
   const subRef = useRef(null)
@@ -71,8 +72,13 @@ function ContentPanel({ section, selectedSubSection, hasPrev, hasNext, prevSecti
           )}
         </div>
 
+        {/* Quiz section */}
+        {section.isQuiz && section.quiz && (
+          <QuizPanel quiz={section.quiz} moduleNumber={moduleNumber} />
+        )}
+
         {/* Section Content - using MarkdownRenderer for parsed content */}
-        {section.content && section.content.length > 0 && (
+        {!section.isQuiz && section.content && section.content.length > 0 && (
           <MarkdownRenderer blocks={section.content} moduleNumber={moduleNumber} />
         )}
 

@@ -9,6 +9,7 @@ import m2Raw from './2/M2.txt?raw'
 import m3Raw from './3/M3.txt?raw'
 import m4Raw from './4/M4.txt?raw'
 import { buildModuleData } from '../utils/parseContent'
+import { quizData } from './quizData'
 
 // モジュールメタ情報
 const moduleInfo = [
@@ -86,6 +87,23 @@ function buildAllContent() {
   for (const info of moduleInfo) {
     const entries = buildModuleData(info.raw, info.number, info)
     allEntries.push(...entries)
+
+    // モジュール末尾にクイズセクションを追加
+    const quiz = quizData.find(q => q.moduleNumber === info.number)
+    if (quiz) {
+      allEntries.push({
+        id: `quiz-module-${info.number}`,
+        title: quiz.title,
+        icon: '📝',
+        category: `Module ${info.number} クイズ`,
+        description: quiz.description,
+        moduleNumber: info.number,
+        isQuiz: true,
+        quiz: quiz,
+        content: [],
+        subSections: [],
+      })
+    }
   }
 
   return allEntries
