@@ -172,6 +172,12 @@ function addLineToContent(contentArray, trimmedLine, allLines, lineIdx) {
     return
   }
 
+  // >>>gradebook ブロック開始（GRADEBookからの追加解説）
+  if (trimmedLine.startsWith('>>>gradebook')) {
+    contentArray.push({ type: 'gradebook-start', text: trimmedLine.replace(/^>>>gradebook【(.+?)】/, '$1') })
+    return
+  }
+
   // >>>補足 ノートブロック開始（これは複数行にまたがるので特別処理が必要）
   // parseModuleContent内で処理済みなので、ここでは行単位で扱う
   if (trimmedLine.startsWith('>>>補足')) {
@@ -265,10 +271,12 @@ function consolidateNoteBlocks(blocks) {
   let noteTitle = null
   let noteContent = []
   let inNote = false
+  let noteType = 'note' // 'note' or 'gradebook'
 
   for (const block of blocks) {
-    if (block.type === 'note-start') {
+    if (block.type === 'note-start' || block.type === 'gradebook-start') {
       inNote = true
+      noteType = block.type === 'gradebook-start' ? 'gradebook' : 'note'
       noteTitle = block.text
       noteContent = []
       continue
@@ -277,7 +285,7 @@ function consolidateNoteBlocks(blocks) {
     if (block.type === 'note-end') {
       inNote = false
       result.push({
-        type: 'note',
+        type: noteType,
         title: noteTitle,
         blocks: noteContent,
       })
@@ -296,7 +304,7 @@ function consolidateNoteBlocks(blocks) {
   // 閉じられなかったノートがある場合
   if (inNote && noteContent.length > 0) {
     result.push({
-      type: 'note',
+      type: noteType,
       title: noteTitle,
       blocks: noteContent,
     })

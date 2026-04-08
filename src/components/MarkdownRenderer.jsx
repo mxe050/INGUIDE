@@ -72,6 +72,9 @@ const ContentBlock = memo(function ContentBlock({ block, moduleNumber }) {
     case 'note':
       return <NoteBlock title={block.title} blocks={block.blocks} moduleNumber={moduleNumber} />
 
+    case 'gradebook':
+      return <GradeBookBlock title={block.title} blocks={block.blocks} moduleNumber={moduleNumber} />
+
     case 'list':
       return (
         <ul className="list-disc pl-6 mb-4 space-y-1.5">
@@ -209,6 +212,43 @@ const NoteBlock = memo(function NoteBlock({ title, blocks, moduleNumber }) {
       {isExpanded && (
         <div className="px-5 pb-4 pt-0 border-t border-amber-100">
           <div className="pt-3">
+            <MarkdownRenderer blocks={blocks} moduleNumber={moduleNumber} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+})
+
+/**
+ * GRADEBookからの解説ブロックコンポーネント
+ */
+const GradeBookBlock = memo(function GradeBookBlock({ title, blocks, moduleNumber }) {
+  const [isExpanded, setIsExpanded] = useState(false)
+
+  return (
+    <div className="my-5 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-teal-50/40 overflow-hidden">
+      <button
+        onClick={() => setIsExpanded(prev => !prev)}
+        className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left cursor-pointer hover:bg-emerald-100/40 transition-colors"
+      >
+        <div className="flex items-center gap-2.5">
+          <span className="text-emerald-600 text-lg shrink-0">📖</span>
+          <div className="flex flex-col">
+            <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">GRADEBookからの解説</span>
+            {title && <span className="text-sm font-semibold text-emerald-800">{title}</span>}
+          </div>
+        </div>
+        <svg
+          className={`w-4 h-4 text-emerald-400 transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {isExpanded && (
+        <div className="px-5 pb-4 pt-0 border-t border-emerald-100">
+          <div className="pt-3 text-sm">
             <MarkdownRenderer blocks={blocks} moduleNumber={moduleNumber} />
           </div>
         </div>
