@@ -191,23 +191,25 @@ const NoteBlock = memo(function NoteBlock({ title, blocks, moduleNumber }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div className="my-5 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50/80 to-orange-50/40 overflow-hidden">
+    <div className="my-5 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50/80 to-orange-50/40 overflow-hidden shadow-sm">
       <button
         onClick={() => setIsExpanded(prev => !prev)}
         className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left cursor-pointer hover:bg-amber-100/40 transition-colors"
       >
         <div className="flex items-center gap-2.5">
           <span className="text-amber-500 text-lg shrink-0">💡</span>
-          <span className="text-sm font-semibold text-amber-800">
+          <span className="text-sm font-bold text-amber-800">
             補足{title ? `：${title}` : ''}
           </span>
         </div>
-        <svg
-          className={`w-4 h-4 text-amber-400 transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <div className={`flex items-center justify-center w-7 h-7 rounded-full ${isExpanded ? 'bg-amber-200' : 'bg-amber-100'} transition-colors shrink-0`}>
+          <svg
+            className={`w-4 h-4 text-amber-600 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </button>
       {isExpanded && (
         <div className="px-5 pb-4 pt-0 border-t border-amber-100">
@@ -227,28 +229,32 @@ const GradeBookBlock = memo(function GradeBookBlock({ title, blocks, moduleNumbe
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div className="my-5 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50/80 to-teal-50/40 overflow-hidden">
+    <div className="my-6 rounded-xl border-2 border-emerald-300 bg-gradient-to-br from-emerald-50 via-teal-50/60 to-cyan-50/40 overflow-hidden shadow-sm">
       <button
         onClick={() => setIsExpanded(prev => !prev)}
-        className="w-full flex items-center justify-between gap-3 px-5 py-3.5 text-left cursor-pointer hover:bg-emerald-100/40 transition-colors"
+        className="w-full flex items-center justify-between gap-3 px-5 py-4 text-left cursor-pointer hover:bg-emerald-100/50 transition-colors"
       >
-        <div className="flex items-center gap-2.5">
-          <span className="text-emerald-600 text-lg shrink-0">📖</span>
-          <div className="flex flex-col">
-            <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">GRADEBookからの解説</span>
-            {title && <span className="text-sm font-semibold text-emerald-800">{title}</span>}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-emerald-100 border border-emerald-200 shrink-0">
+            <span className="text-emerald-700 text-lg">📖</span>
+          </div>
+          <div className="flex flex-col gap-0.5">
+            <span className="text-xs font-extrabold text-emerald-600 uppercase tracking-widest">GRADEBookからの解説</span>
+            {title && <span className="text-sm font-bold text-emerald-900">{title}</span>}
           </div>
         </div>
-        <svg
-          className={`w-4 h-4 text-emerald-400 transition-transform duration-200 shrink-0 ${isExpanded ? 'rotate-180' : ''}`}
-          fill="none" stroke="currentColor" viewBox="0 0 24 24"
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-        </svg>
+        <div className={`flex items-center justify-center w-7 h-7 rounded-full ${isExpanded ? 'bg-emerald-200' : 'bg-emerald-100'} transition-colors shrink-0`}>
+          <svg
+            className={`w-4 h-4 text-emerald-600 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
+            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+          </svg>
+        </div>
       </button>
       {isExpanded && (
-        <div className="px-5 pb-4 pt-0 border-t border-emerald-100">
-          <div className="pt-3 text-sm">
+        <div className="px-5 pb-5 pt-0 border-t-2 border-emerald-200 bg-white/60">
+          <div className="pt-4 text-sm leading-relaxed text-slate-700">
             <MarkdownRenderer blocks={blocks} moduleNumber={moduleNumber} />
           </div>
         </div>
